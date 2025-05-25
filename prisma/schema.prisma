@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/generated"
+  runtime  = "deno"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Auth {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  password  String
+  lastLogin DateTime?
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime  @updatedAt @db.Timestamp(6)
+}
+
+// model AuthHasPermission {
+//   id           Int        @id @default(autoincrement())
+//   auth         Auth       @relation(fields: [authId], references: [id])
+//   authId       Int
+//   permissionId Int
+//   permission   Permission @relation(fields: [permissionId], references: [id])
+//   objectId     Int?
+// }
+
+// model Person {
+//   id        Int               @id @default(autoincrement())
+//   name      String
+//   auth      Auth?
+//   phone     String?
+//   email     String?
+//   bio       String?           @db.LongText
+//   delete    Boolean           @default(false)
+//   projects  PersonOnProject[]
+//   createdAt DateTime          @default(now()) @db.Timestamp(6)
+//   updatedAt DateTime          @updatedAt @db.Timestamp(6)
+// }
+
+// model Project {
+//   id                       Int       @id @default(autoincrement())
+//   title                    String
+//   begin                    DateTime
+//   end                      DateTime?
+//   fallback_contact_person  String?
+//   fallback_customer_person String?
+//   task                     String?   @db.LongText
+//   arrival                  String?   @db.LongText
+//   additional_information   String?   @db.LongText
+//   delete                   Boolean   @default(false)
+
+//   persons   PersonOnProject[]
+//   locations LocationFromProject[]
+//   models    ModelOnProject[]
+
+//   storyboards   Storyboard[]
+//   dispos        Dispo[]
+//   projectboards Projectboard[]
+
+//   customers CustomerProject[]
+//   createdAt DateTime          @default(now()) @db.Timestamp(6)
+//   updatedAt DateTime          @updatedAt @db.Timestamp(6)
+// }
