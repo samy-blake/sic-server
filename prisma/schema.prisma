@@ -18,49 +18,41 @@ model Auth {
   updatedAt DateTime  @updatedAt @db.Timestamp(6)
 }
 
-// model AuthHasPermission {
-//   id           Int        @id @default(autoincrement())
-//   auth         Auth       @relation(fields: [authId], references: [id])
-//   authId       Int
-//   permissionId Int
-//   permission   Permission @relation(fields: [permissionId], references: [id])
-//   objectId     Int?
-// }
+model Playlist {
+  id    String @id
+  name  String
+  genre String
 
-// model Person {
-//   id        Int               @id @default(autoincrement())
-//   name      String
-//   auth      Auth?
-//   phone     String?
-//   email     String?
-//   bio       String?           @db.LongText
-//   delete    Boolean           @default(false)
-//   projects  PersonOnProject[]
-//   createdAt DateTime          @default(now()) @db.Timestamp(6)
-//   updatedAt DateTime          @updatedAt @db.Timestamp(6)
-// }
+  songs SongInPlaylist[]
 
-// model Project {
-//   id                       Int       @id @default(autoincrement())
-//   title                    String
-//   begin                    DateTime
-//   end                      DateTime?
-//   fallback_contact_person  String?
-//   fallback_customer_person String?
-//   task                     String?   @db.LongText
-//   arrival                  String?   @db.LongText
-//   additional_information   String?   @db.LongText
-//   delete                   Boolean   @default(false)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+}
 
-//   persons   PersonOnProject[]
-//   locations LocationFromProject[]
-//   models    ModelOnProject[]
+model SongInPlaylist {
+  songId     String
+  song       Song     @relation(fields: [songId], references: [id])
+  playlistId String
+  Playlist   Playlist @relation(fields: [playlistId], references: [id])
 
-//   storyboards   Storyboard[]
-//   dispos        Dispo[]
-//   projectboards Projectboard[]
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
 
-//   customers CustomerProject[]
-//   createdAt DateTime          @default(now()) @db.Timestamp(6)
-//   updatedAt DateTime          @updatedAt @db.Timestamp(6)
-// }
+  @@id([songId, playlistId])
+}
+
+model Song {
+  id          String           @id
+  artists     String
+  name        String
+  trackNumber Int
+  playlists   SongInPlaylist[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+}
+
+model Log {
+  id  Int    @id @default(autoincrement())
+  msg String
+}
