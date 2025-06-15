@@ -19,20 +19,26 @@ model Auth {
 }
 
 model Playlist {
-  id    String @id
-  name  String
-  genre String
+  id              String  @id
+  name            String
+  genre           String
+  createUpdateLog Boolean @default(true)
+  image           String
+  url             String  @db.LongText
 
   songs SongInPlaylist[]
 
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  UpdateLog UpdateLog[]
 }
 
 model SongInPlaylist {
   songId     String
   song       Song     @relation(fields: [songId], references: [id])
   playlistId String
+  addedAt    String
   Playlist   Playlist @relation(fields: [playlistId], references: [id])
 
   createdAt DateTime @default(now()) @db.Timestamp(6)
@@ -42,17 +48,31 @@ model SongInPlaylist {
 }
 
 model Song {
-  id          String           @id
-  artists     String
-  name        String
-  trackNumber Int
-  playlists   SongInPlaylist[]
+  id        String           @id
+  artists   String
+  name      String
+  image     String
+  playlists SongInPlaylist[]
 
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  UpdateLog UpdateLog[]
 }
 
-model Log {
-  id  Int    @id @default(autoincrement())
-  msg String
+model UpdateLog {
+  id              Int          @id @default(autoincrement())
+  songId          String?
+  song            Song?        @relation(fields: [songId], references: [id])
+  playlistId      String
+  playlist        Playlist     @relation(fields: [playlistId], references: [id])
+  type            UpdateLogTyp
+  alternativeSong String?      @db.LongText
+  createdAt       DateTime     @default(now()) @db.Timestamp(6)
+}
+
+enum UpdateLogTyp {
+  CREATE
+  UPDATE
+  DELETE
 }

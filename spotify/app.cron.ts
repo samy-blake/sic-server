@@ -1,38 +1,72 @@
 import { prisma } from "../app/config/db.ts";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import { iDB } from "../app/interfaces/DB.ts";
 
 const api = SpotifyApi.withClientCredentials(
   Deno.env.get("SPOTIFY_CLIENT_ID") as string,
   Deno.env.get("SPOTIFY_CLIENT_SECRET") as string,
 );
 
-async function compareDbAndSpotify(id: string): Promise<void> {
+async function compareDbAndSpotify(playlist: iDB.Playlist): Promise<void> {
   const dbSongs = await prisma.song.findMany({
+    include: {
+      playlists: {
+        select: {
+          addedAt: true,
+        },
+      },
+    },
     where: {
       playlists: {
-        every: {
-          playlistId: id,
+        some: {
+          playlistId: playlist.id,
         },
       },
     },
   });
+  // api.playlists.getPlaylistItems(playlist.id, "DE", "all", )
+  const spotifyPlaylist = await api.playlists.getPlaylist(
+    playlist.id,
+    "DE",
+    "href,images,tracks(total,items(added_at,track(id,name,artists(name),album(images))))",
+  );
+  const spotifyPlaylistSongIds: string[] = [];
 
-  const spotifyPlaylist = await api.playlists.getPlaylist(id);
-  spotifyPlaylist.tracks.items.forEach(async (t) => {
+  const tracks = [...spotifyPlaylist.tracks.items];
+
+  while (spotifyPlaylist.tracks.total > tracks.length) {
+    // load more tracks from playlist
+    const spotifyPlayListItems = await api.playlists.getPlaylistItems(
+      playlist.id,
+      "DE",
+      "items(added_at,track(id,name,artists(name),album(images)))",
+      50,
+      tracks.length - 1,
+    );
+    tracks.push(...spotifyPlayListItems.items);
+  }
+
+  tracks.sort((a: any, b: any) =>
+    (new Date(a.track.added_at)).getTime() -
+    (new Date(b.track.added_at)).getTime()
+  );
+
+  tracks.forEach(async (t) => {
     const track = {
       artists: t.track.artists.map((a) => a.name).join(", "),
       id: t.track.id,
       name: t.track.name,
-      trackNumber: t.track.track_number,
+      image: t.track.album?.images[0]?.url || "",
     };
+    spotifyPlaylistSongIds.push(track.id);
 
-    const dbTrack = dbSongs.filter((s) => s.id = track.id).pop();
+    const dbTrack = dbSongs.filter((s) => s.id === track.id).pop();
     if (dbTrack) {
       //update
       if (
-        track.artists == dbTrack.artists ||
-        track.name == dbTrack.name ||
-        track.trackNumber == dbTrack.trackNumber
+        track.artists !== dbTrack.artists ||
+        track.name !== dbTrack.name ||
+        track.image !== dbTrack.image
       ) {
         try {
           await prisma.song.update({
@@ -41,6 +75,18 @@ async function compareDbAndSpotify(id: string): Promise<void> {
             },
             data: track,
           });
+
+          // TODO: rethinking!!!11elf
+
+          // if (playlist.createUpdateLog) {
+          //   await prisma.updateLog.create({
+          //     data: {
+          //       songId: dbTrack.id,
+          //       playlistId: playlist.id,
+          //       type: "UPDATE",
+          //     },
+          //   });
+          // }
           console.log("UPDATE", "Track:", track.name, "Artists", track.artists);
         } catch (err) {
           console.error(JSON.stringify(track), err);
@@ -49,33 +95,108 @@ async function compareDbAndSpotify(id: string): Promise<void> {
     } else {
       //create
       try {
-        await prisma.song.create({
+        const newSong = await prisma.song.create({
           data: {
             ...track,
             playlists: {
               create: {
-                playlistId: id,
+                playlistId: playlist.id,
+                addedAt: t.added_at,
               },
             },
           },
         });
+        if (playlist.createUpdateLog) {
+          await prisma.updateLog.create({
+            data: {
+              songId: newSong.id,
+              playlistId: playlist.id,
+              type: "CREATE",
+            },
+          });
+        }
         console.log("CREATE", "Track:", track.name, "Artists", track.artists);
-      } catch (err) {
-        console.error(JSON.stringify(track), err);
+      } catch (err: any) {
+        if (err?.meta?.target === "PRIMARY") {
+          // song in other playlist already exists
+          const existingSong = await prisma.song.findFirst({
+            where: { id: track.id },
+          });
+
+          if (existingSong) {
+            await prisma.songInPlaylist.create({
+              data: {
+                playlistId: playlist.id,
+                songId: existingSong.id,
+                addedAt: t.added_at,
+              },
+            });
+            if (playlist.createUpdateLog) {
+              await prisma.updateLog.create({
+                data: {
+                  songId: existingSong.id,
+                  playlistId: playlist.id,
+                  type: "CREATE",
+                },
+              });
+            }
+          } else {
+            // console.error()
+          }
+        } else {
+          console.error(JSON.stringify(track), err);
+        }
       }
     }
   });
+
+  // delete songs
+  dbSongs.filter((v) => !spotifyPlaylistSongIds.includes(v.id)).forEach(
+    async (s) => {
+      await prisma.song.delete({
+        where: {
+          id: s.id,
+        },
+      });
+
+      if (playlist.createUpdateLog) {
+        await prisma.updateLog.create({
+          data: {
+            type: "DELETE",
+            alternativeSong: JSON.stringify({
+              id: s.id,
+              artists: s.artists,
+              name: s.name,
+            }),
+            playlistId: playlist.id,
+          },
+        });
+      }
+    },
+  );
+
+  const playListData = {
+    id: playlist.id,
+    url: spotifyPlaylist.href,
+    image: spotifyPlaylist.images[0]?.url,
+  };
+
+  if (
+    playlist.url !== playListData.url ||
+    playlist.image !== playListData.image
+  ) {
+    // update playlist Data
+    await prisma.playlist.update({
+      where: {
+        id: playListData.id,
+      },
+      data: playListData,
+    });
+  }
 }
 
-// Deno.cron("Log a message", { hour: { every: 1 } }, async () => {
-console.log("Start cron", (new Date()).toISOString());
-const playlists = await prisma.playlist.findMany();
-const playlistPromises: Promise<void>[] = playlists.map(async (p) =>
-  await compareDbAndSpotify(p.id)
-);
-
-const results = await Promise.allSettled<void>(playlistPromises);
-results.forEach((r) => {
-  console.log("status:", r);
+Deno.cron("Log a message", { hour: { every: 1 } }, async () => {
+  console.log("Start cron", (new Date()).toISOString());
+  const playlists: iDB.Playlist[] = await prisma.playlist.findMany();
+  playlists.forEach(async (p) => await compareDbAndSpotify(p));
 });
-// });

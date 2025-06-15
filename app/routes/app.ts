@@ -4,15 +4,17 @@ import { cors } from "hono/cors";
 
 import { openAPISpecs } from "hono-openapi";
 import { AuthRoutes } from "./auth.ts";
+import { PlaylistRoutes } from "./playlist.ts";
 
 const app = new Hono();
 
 app.use(cors());
 // app.use(csrf());
 
-app.get("/", (c) => c.text("Huhu \nGreetings Sören!"));
+app.get("/api/", (c) => c.text("Aloa \nGreetings Samy!"));
 
 app.route("/api/auth", AuthRoutes);
+app.route("/api/playlist", PlaylistRoutes);
 
 app.get(
   "/docs",
@@ -25,7 +27,7 @@ app.get(
       },
       // servers: [{ url: "http://localhost:3000", description: "Local Server" }],
     },
-  })
+  }),
 );
 app.get("/ui", swaggerUI({ url: "/docs" }));
 

@@ -1,8 +1,10 @@
 {
+  "version": "0.0.1",
   "tasks": {
     "start": "deno --allow-env app/main.ts",
     "prisma:client": "deno run -A --unstable-detect-cjs npm:prisma generate --no-hints",
     "prisma:db": "deno run -A npm:prisma db push",
+    "prisma:db:reset": "deno run -A npm:prisma db push --force-reset",
     "prisma:dev": "deno run -A npm:prisma migrate dev",
     "prisma": "deno task prisma:db && deno task prisma:client",
     "prisma:studio": "deno run -A npm:prisma studio"
