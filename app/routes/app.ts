@@ -8,12 +8,14 @@ import { PlaylistRoutes } from "./playlist.ts";
 
 const app = new Hono();
 
-app.use(cors());
+app.use(cors({
+  origin: ["sic.spielwiese.ninja", "api.sic.spielwiese.ninja"],
+}));
 // app.use(csrf());
 
 app.get("/api/", (c) => c.text("Aloa \nGreetings Samy!"));
 
-app.route("/api/auth", AuthRoutes);
+// app.route("/api/auth", AuthRoutes);
 app.route("/api/playlist", PlaylistRoutes);
 
 app.get(

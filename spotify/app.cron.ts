@@ -124,13 +124,17 @@ async function compareDbAndSpotify(playlist: iDB.Playlist): Promise<void> {
           });
 
           if (existingSong) {
-            await prisma.songInPlaylist.create({
-              data: {
-                playlistId: playlist.id,
-                songId: existingSong.id,
-                addedAt: t.added_at,
-              },
-            });
+            try {
+              await prisma.songInPlaylist.create({
+                data: {
+                  playlistId: playlist.id,
+                  songId: existingSong.id,
+                  addedAt: t.added_at,
+                },
+              });
+            } catch (e) {
+              console.error(e);
+            }
             if (playlist.createUpdateLog) {
               await prisma.updateLog.create({
                 data: {
@@ -141,7 +145,7 @@ async function compareDbAndSpotify(playlist: iDB.Playlist): Promise<void> {
               });
             }
           } else {
-            // console.error()
+            console.error(JSON.stringify(track), "not found in songs :(");
           }
         } else {
           console.error(JSON.stringify(track), err);
@@ -177,12 +181,10 @@ async function compareDbAndSpotify(playlist: iDB.Playlist): Promise<void> {
 
   const playListData = {
     id: playlist.id,
-    url: spotifyPlaylist.href,
     image: spotifyPlaylist.images[0]?.url,
   };
 
   if (
-    playlist.url !== playListData.url ||
     playlist.image !== playListData.image
   ) {
     // update playlist Data
@@ -195,8 +197,8 @@ async function compareDbAndSpotify(playlist: iDB.Playlist): Promise<void> {
   }
 }
 
-Deno.cron("Log a message", { hour: { every: 1 } }, async () => {
-  console.log("Start cron", (new Date()).toISOString());
-  const playlists: iDB.Playlist[] = await prisma.playlist.findMany();
-  playlists.forEach(async (p) => await compareDbAndSpotify(p));
-});
+// Deno.cron("Log a message", { hour: { every: 1 } }, async () => {
+console.log("Start cron", (new Date()).toISOString());
+const playlists: iDB.Playlist[] = await prisma.playlist.findMany();
+playlists.forEach(async (p) => await compareDbAndSpotify(p));
+// });

@@ -40,7 +40,6 @@ app.get(
         image: true,
         name: true,
         updatedAt: true,
-        url: true,
         _count: {
           select: {
             songs: true,
@@ -48,6 +47,9 @@ app.get(
         },
       },
       where: params,
+      orderBy: {
+        order: "asc",
+      },
     });
 
     return c.json(playlists);
@@ -69,6 +71,9 @@ app.get(
           select: {
             addedAt: true,
             song: true,
+          },
+          orderBy: {
+            addedAt: "asc",
           },
         },
       },

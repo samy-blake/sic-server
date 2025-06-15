@@ -24,7 +24,7 @@ model Playlist {
   genre           String
   createUpdateLog Boolean @default(true)
   image           String
-  url             String  @db.LongText
+  order           Int
 
   songs SongInPlaylist[]
 

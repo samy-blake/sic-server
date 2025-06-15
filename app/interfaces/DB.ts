@@ -5,7 +5,6 @@ export namespace iDB {
     name: string;
     genre: string;
     image: string;
-    url: string;
     createdAt: Date;
     updatedAt: Date;
   }
