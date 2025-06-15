@@ -197,8 +197,12 @@ async function compareDbAndSpotify(playlist: iDB.Playlist): Promise<void> {
   }
 }
 
-// Deno.cron("Log a message", { hour: { every: 1 } }, async () => {
-console.log("Start cron", (new Date()).toISOString());
-const playlists: iDB.Playlist[] = await prisma.playlist.findMany();
-playlists.forEach(async (p) => await compareDbAndSpotify(p));
-// });
+async function main() {
+  const playlists: iDB.Playlist[] = await prisma.playlist.findMany();
+  playlists.forEach(async (p) => await compareDbAndSpotify(p));
+}
+
+Deno.cron("Spotify Cron", { hour: { every: 1 } }, async () => {
+  await main();
+});
+main();
