@@ -9,7 +9,7 @@ import { PlaylistRoutes } from "./playlist.ts";
 const app = new Hono();
 
 app.use(cors({
-  origin: ["sic.spielwiese.ninja", "api.sic.spielwiese.ninja"],
+  origin: ["https://sic.spielwiese.ninja", "https://api.sic.spielwiese.ninja"],
 }));
 // app.use(csrf());
 
