@@ -202,7 +202,6 @@ async function main() {
   playlists.forEach(async (p) => await compareDbAndSpotify(p));
 }
 
-Deno.cron("Spotify Cron", { hour: { every: 1 } }, async () => {
+Deno.cron("Spotify Cron", { hour: { every: 20 } }, async () => {
   await main();
 });
-main();
