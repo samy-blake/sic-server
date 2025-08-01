@@ -6,10 +6,13 @@ import { generateHash } from "../app/util/hash.ts";
 // @ts-types="generated/index.d.ts"
 import { Prisma } from "generated/index.js";
 
-const auth = {
-  username: "sbalke",
-  password: generateHash("soerenbalke"),
-};
+if (!await prisma.auth.count()) {
+  const auth = {
+    username: "sbalke",
+    password: generateHash("soerenbalke"),
+  };
+  await prisma.auth.create({ data: auth });
+}
 
 const playlists: Prisma.PlaylistCreateManyInput[] = [
   {
@@ -48,25 +51,32 @@ const playlists: Prisma.PlaylistCreateManyInput[] = [
     order: 6,
   },
   {
+    id: "1hORL79vJlpPCfoFbdwOaO",
+    genre: "Techno",
+    name: "Sharing is Caring - Techno Edition",
+    image: "",
+    order: 7,
+  },
+  {
     id: "2PtbYneEB5ecaQf9uZlZ1Q",
     genre: "Hardstyle, Rawstyle",
     name: "Sharing is Caring - Power Edition",
     image: "",
-    order: 7,
+    order: 8,
   },
   {
     id: "2FycJWRH5AganIgWbbkvrp",
     genre: "Hardcore, Frenchcore",
     name: "Sharing is Caring - Superpower Edition",
     image: "",
-    order: 8,
+    order: 9,
   },
   {
     id: "3cCj6LiWZ09nldw1uUrsvb",
     genre: "Drum and Bass",
     name: "Sharing is Caring - DnB Edition",
     image: "",
-    order: 9,
+    order: 10,
   },
   {
     id: "3f1Kqad1rYCIRuMukyeOVe",
@@ -74,14 +84,28 @@ const playlists: Prisma.PlaylistCreateManyInput[] = [
     name: "Sharing is Caring - Schubrakete Daily",
     createUpdateLog: false,
     image: "",
-    order: 10,
+    order: 11,
   },
 ];
 
-await prisma.auth.create({ data: auth });
-
-await prisma.playlist.createMany({
-  data: playlists,
-});
+for (const playlist of playlists) {
+  const dbPlaylist = await prisma.playlist.findFirst({
+    where: {
+      id: playlist.id,
+    },
+  });
+  if (dbPlaylist) {
+    await prisma.playlist.update({
+      where: {
+        id: playlist.id,
+      },
+      data: playlist,
+    });
+  } else {
+    await prisma.playlist.create({
+      data: playlist,
+    });
+  }
+}
 
 await prisma.$disconnect();
