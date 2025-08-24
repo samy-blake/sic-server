@@ -5,6 +5,7 @@ import { cors } from "hono/cors";
 import { openAPISpecs } from "hono-openapi";
 import { AuthRoutes } from "./auth.ts";
 import { PlaylistRoutes } from "./playlist.ts";
+import { SpotifyRoutes } from "./spotify.ts";
 
 const app = new Hono();
 
@@ -15,8 +16,9 @@ app.use(cors({
 
 app.get("/api/", (c) => c.text("Aloa \nGreetings Samy!"));
 
-// app.route("/api/auth", AuthRoutes);
+app.route("/api/auth", AuthRoutes);
 app.route("/api/playlist", PlaylistRoutes);
+app.route("/api/spotify", SpotifyRoutes);
 
 app.get(
   "/docs",
@@ -24,7 +26,7 @@ app.get(
     documentation: {
       info: {
         title: "Sharing is Caring Server",
-        version: "0.0.1",
+        version: "0.0.2",
         description: "Author: Sören Balke",
       },
       // servers: [{ url: "http://localhost:3000", description: "Local Server" }],

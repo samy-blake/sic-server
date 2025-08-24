@@ -7,7 +7,7 @@ import "zod-openapi/extend";
 import { prisma } from "../config/db.ts";
 import { AuthDoc } from "../docs/auth.docs.ts";
 import { JWToken } from "../interfaces/JWT.interface.ts";
-import { compareHash } from "../util/hash.ts";
+import { compareHash, generateHash } from "../util/hash.ts";
 
 const app = new Hono();
 
@@ -15,7 +15,6 @@ const loginSchema = z.object({
   username: z.string(),
   password: z.string(),
 });
-
 app.post(
   "/login",
   AuthDoc.login,
@@ -36,11 +35,101 @@ app.post(
       id: auth.id,
       username: auth.username,
       exp: Math.floor(Date.now() / 1000) + 60 * 200, // 200min
+      linkedSpotify: !!auth.spotifyAccessData,
     };
     const token = await sign(jwtData as any, Deno.env.get("JWT_SECRET") || "");
 
     return c.json({ token });
-  }
+  },
+);
+
+const registerSchema = z.object({
+  username: z.string(),
+  password: z.string(),
+  email: z.string().optional(),
+});
+app.post(
+  "/register",
+  AuthDoc.register,
+  zValidator("json", registerSchema),
+  async (c) => {
+    const data = c.req.valid("json");
+
+    const auth = await prisma.auth.findFirst({
+      where: {
+        username: data.username,
+      },
+    });
+
+    if (auth) {
+      c.status(400);
+      return c.json({
+        error: "invalid data",
+      });
+    }
+    data.password = generateHash(data.password);
+    await prisma.auth.create({
+      data: data,
+    });
+
+    c.status(200);
+    c.json({});
+  },
+);
+
+const updateSchema = z.object({
+  username: z.string(),
+}).or(z.object({
+  password: z.string(),
+  passwordCheck: z.string(),
+})).or(z.object({
+  username: z.string(),
+  password: z.string(),
+  passwordCheck: z.string(),
+}));
+app.put(
+  "/",
+  jwtMiddleWare({
+    secret: Deno.env.get("JWT_SECRET") || "",
+  }),
+  zValidator("json", updateSchema),
+  AuthDoc.update,
+  async (c) => {
+    const data = c.req.valid("json");
+    if ("password" in data && "passwordCheck" in data) {
+      if (data.password !== data.passwordCheck) {
+        c.status(400);
+        return c.json({ error: "password not match" });
+      }
+
+      data.password = generateHash(data.password);
+    }
+
+    if ("username" in data) {
+      const usernameCheck = await prisma.auth.findFirst({
+        where: {
+          username: data.username,
+        },
+      });
+
+      if (usernameCheck) {
+        c.status(400);
+        return c.json({ error: "username is taken" });
+      }
+    }
+
+    const tokenData: JWToken = c.get("jwtPayload");
+
+    await prisma.auth.update({
+      where: {
+        id: tokenData.id,
+      },
+      data: {
+        ...("password" in data ? { password: data.password } : {}),
+        ...("username" in data ? { username: data.username } : {}),
+      },
+    });
+  },
 );
 
 app.get(
@@ -51,7 +140,7 @@ app.get(
   AuthDoc.check,
   async (c) => {
     return c.body("", 200);
-  }
+  },
 );
 
 export { app as AuthRoutes };

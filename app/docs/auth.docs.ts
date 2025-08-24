@@ -18,6 +18,55 @@ doc.login = describeRoute({
     },
   },
 });
+
+// doc.loginEmail = describeRoute({
+//   description: "User Login via email",
+//   responses: {
+//     200: {
+//       description: "Email send",
+//       content: {
+//         "application/json": {
+//           schema: resolver(z.object({ token: z.string() })),
+//         },
+//       },
+//     },
+//   },
+// });
+
+doc.register = describeRoute({
+  description: "User Register",
+  responses: {
+    200: {
+      description: "Successful Register",
+    },
+    400: {
+      description: "Username is invalid",
+      content: {
+        "application/json": {
+          schema: resolver(z.object({ error: z.string() })),
+        },
+      },
+    },
+  },
+});
+
+doc.update = describeRoute({
+  description: "update login data",
+  responses: {
+    200: {
+      description: "update successful",
+    },
+    400: {
+      description: "username is taken or password doesnt match password check",
+      content: {
+        "application/json": {
+          schema: resolver(z.object({ error: z.string() })),
+        },
+      },
+    },
+  },
+});
+
 doc.check = describeRoute({
   description: "User Token Checker",
   responses: {
