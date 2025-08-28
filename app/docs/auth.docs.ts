@@ -36,7 +36,7 @@ doc.login = describeRoute({
 doc.register = describeRoute({
   description: "User Register",
   responses: {
-    200: {
+    204: {
       description: "Successful Register",
     },
     400: {

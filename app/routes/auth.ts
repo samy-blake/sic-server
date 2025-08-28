@@ -28,7 +28,7 @@ app.post(
     });
 
     if (!auth || !compareHash(data.password, auth?.password)) {
-      return c.json({}, 400);
+      return c.body(null, 400);
     }
 
     const jwtData: JWToken = {
@@ -44,8 +44,8 @@ app.post(
 );
 
 const registerSchema = z.object({
-  username: z.string(),
-  password: z.string(),
+  username: z.string().min(5),
+  password: z.string().min(5),
   email: z.string().optional(),
 });
 app.post(
@@ -72,8 +72,7 @@ app.post(
       data: data,
     });
 
-    c.status(200);
-    c.json({});
+    return c.body(null, 204);
   },
 );
 

@@ -12,6 +12,7 @@
     "npm:@hono/zod-validator@~0.4.3": "0.4.3_hono@4.7.10_zod@3.25.28",
     "npm:@prisma/client@^6.5.0": "6.8.2_prisma@6.8.2",
     "npm:@spotify/web-api-ts-sdk@^1.2.0": "1.2.0",
+    "npm:@types/node@*": "22.15.15",
     "npm:@types/node@^22.13.17": "22.15.21",
     "npm:bcrypt@^5.1.1": "5.1.1",
     "npm:hono-openapi@~0.4.6": "0.4.8_@hono+zod-validator@0.4.3__hono@4.7.10__zod@3.25.28_hono@4.7.10_openapi-types@12.1.3_zod@3.25.28_zod-openapi@4.2.4__zod@3.25.28",
@@ -170,6 +171,12 @@
     },
     "@types/json-schema@7.0.15": {
       "integrity": "sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA=="
+    },
+    "@types/node@22.15.15": {
+      "integrity": "sha512-R5muMcZob3/Jjchn5LcO8jdKwSCbzqmPB6ruBxMcf9kbxtniZHP327s6C37iOfuw8mbKK3cAQa7sEl7afLrQ8A==",
+      "dependencies": [
+        "undici-types"
+      ]
     },
     "@types/node@22.15.21": {
       "integrity": "sha512-EV/37Td6c+MgKAbkcLG6vqZ2zEYHD7bvSrzqqs2RIhbA6w3x+Dqz8MZM3sP6kGTeLrdoOgKZe+Xja7tUB2DNkQ==",

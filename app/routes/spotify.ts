@@ -62,19 +62,65 @@ app.post(
       },
     });
 
-    return c.json({});
+    return c.body(null, 204);
   },
 );
 
-const schema = z.object({});
+const addSongToPlaylistSchema = z.object({
+  songUri: z.string(),
+  playlistId: z.string(),
+});
+
 app.post(
-  "/",
-  SpotifyDoc.userToken,
-  zValidator("json", schema),
+  "/add-song-to-playlist",
+  SpotifyDoc.addSongToPlaylist,
+  zValidator("json", addSongToPlaylistSchema),
+  async (c) => {
+    const data = c.req.valid("json");
+    const tokenData: JWToken = c.get("jwtPayload");
+    const sdk = await getUserSpotifySdk(tokenData);
+    await sdk.playlists.addItemsToPlaylist(data.playlistId, [data.songUri]);
+    c.status(204);
+    c.json({});
+  },
+);
+
+app.get(
+  "/playlists",
+  SpotifyDoc.addSongToPlaylist,
   async (c) => {
     const tokenData: JWToken = c.get("jwtPayload");
     const sdk = await getUserSpotifySdk(tokenData);
-    // sdk.player.
+    const profileData = await sdk.currentUser.profile();
+    const playlists = await sdk.playlists.getUsersPlaylists(profileData.id);
+    const response = playlists.items.map((p) => ({
+      id: p.id,
+      name: p.name,
+      images: p.images,
+    }));
+    c.json(response);
+  },
+);
+
+app.get(
+  "/access",
+  SpotifyDoc.getAccess,
+  async (c) => {
+    const tokenData: JWToken = c.get("jwtPayload");
+    const { spotifyAccessData } = await prisma.auth.findFirst({
+      where: {
+        id: tokenData.id,
+      },
+      select: {
+        spotifyAccessData: true,
+      },
+    }) || { spotifyAccessData: null };
+
+    if (spotifyAccessData) {
+      return c.json(JSON.parse(spotifyAccessData) as AccessToken);
+    } else {
+      return c.body(null, 403);
+    }
   },
 );
 
