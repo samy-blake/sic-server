@@ -3,9 +3,11 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 
 import { openAPISpecs } from "hono-openapi";
-import { AuthRoutes } from "./auth.ts";
-import { PlaylistRoutes } from "./playlist.ts";
-import { SpotifyRoutes } from "./spotify.ts";
+import { PlaylistRoutes } from "./playlist/_index.ts";
+import { AuthRoutes } from "./auth/_index.ts";
+import { UserRoutes } from "./user/_index.ts";
+import { SpotifyRoutes } from "./spotify/_index.ts";
+import { OwnPlaylistRoutes } from "./own-playlist/_index.ts";
 
 const app = new Hono();
 
@@ -14,11 +16,13 @@ app.use(cors({
 }));
 // app.use(csrf());
 
-app.get("/api/", (c) => c.text("Aloa \nGreetings Samy!"));
+app.get("/", (c) => c.text("Aloa \nGreetings Samy!"));
 
-app.route("/api/auth", AuthRoutes);
-app.route("/api/playlist", PlaylistRoutes);
-app.route("/api/spotify", SpotifyRoutes);
+app.route("/playlist", PlaylistRoutes);
+app.route("/auth", AuthRoutes);
+app.route("/user", UserRoutes);
+app.route("/spotify", SpotifyRoutes);
+app.route("/own-playlist", OwnPlaylistRoutes);
 
 app.get(
   "/docs",
@@ -26,10 +30,10 @@ app.get(
     documentation: {
       info: {
         title: "Sharing is Caring Server",
-        version: "0.0.2",
+        version: "0.1.0",
         description: "Author: Sören Balke",
       },
-      // servers: [{ url: "http://localhost:3000", description: "Local Server" }],
+      servers: [{ url: "http://localhost:3000", description: "Local Server" }],
     },
   }),
 );

@@ -9,16 +9,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Auth {
-  id       Int    @id @default(autoincrement())
+model User {
+  id       String @id @default(uuid())
   username String @unique
   password String
+
+  role UserRoles @default(USER)
 
   spotifyAccessData String? @db.LongText
 
   lastLogin DateTime?
   createdAt DateTime  @default(now()) @db.Timestamp(6)
   updatedAt DateTime  @updatedAt @db.Timestamp(6)
+
+  ownPlaylist OwnPlaylist[]
+
+  songTags     SongTags[]
+  userFavSongs UserFavSongs[]
+}
+
+enum UserRoles {
+  USER
+  ADMIN
 }
 
 model Playlist {
@@ -34,12 +46,14 @@ model Playlist {
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @updatedAt @db.Timestamp(6)
 
-  UpdateLog UpdateLog[]
+  UpdateLog       UpdateLog[]
+  OwnPlaylistItem OwnPlaylistItem[]
 }
 
 model SongInPlaylist {
-  songId     String
-  song       Song     @relation(fields: [songId], references: [id])
+  songId String
+  song   Song   @relation(fields: [songId], references: [id])
+
   playlistId String
   addedAt    String
   Playlist   Playlist @relation(fields: [playlistId], references: [id])
@@ -57,25 +71,119 @@ model Song {
   image     String
   playlists SongInPlaylist[]
 
+  updateLog UpdateLog[]
+
+  createdAt    DateTime       @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime       @updatedAt @db.Timestamp(6)
+  tags         SongTags[]
+  userFavSongs UserFavSongs[]
+
+  ownPlaylistIncludes OwnPlaylist[] @relation("OwnPlaylistInclude")
+  ownPlaylistExcludes OwnPlaylist[] @relation("OwnPlaylistExclude")
+}
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  createdAt DateTime   @default(now()) @db.Timestamp(6)
+  updatedAt DateTime   @updatedAt @db.Timestamp(6)
+  songs     SongTags[]
+}
+
+model SongTags {
+  songId String
+  song   Song   @relation(fields: [songId], references: [id])
+
+  tagId Int
+  tag   Tag @relation(fields: [tagId], references: [id])
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @updatedAt @db.Timestamp(6)
 
-  UpdateLog UpdateLog[]
+  @@id([songId, tagId])
+}
+
+model UserFavSongs {
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  songId String
+  song   Song   @relation(fields: [songId], references: [id])
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+
+  @@id([songId, userId])
 }
 
 model UpdateLog {
-  id              Int          @id @default(autoincrement())
-  songId          String?
-  song            Song?        @relation(fields: [songId], references: [id])
-  playlistId      String
-  playlist        Playlist     @relation(fields: [playlistId], references: [id])
-  type            UpdateLogTyp
-  alternativeSong String?      @db.LongText
-  createdAt       DateTime     @default(now()) @db.Timestamp(6)
+  id     Int     @id @default(autoincrement())
+  songId String?
+  song   Song?   @relation(fields: [songId], references: [id])
+
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id])
+
+  type UpdateLogTyp
+
+  alternativeSong String?  @db.LongText
+  createdAt       DateTime @default(now()) @db.Timestamp(6)
 }
 
 enum UpdateLogTyp {
   CREATE
   UPDATE
   DELETE
+}
+
+model OwnPlaylist {
+  id String @id @default(uuid())
+
+  name String
+
+  linkedPlaylistName String
+  linkedPlaylistId   String
+
+  provider Provider @default(SPOTIFY)
+
+  items OwnPlaylistItem[]
+
+  creationIntervalValue Int
+  creationInterval      CreationInterval
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
+
+  ownPlaylistIncludes Song[] @relation("OwnPlaylistInclude")
+  ownPlaylistExcludes Song[] @relation("OwnPlaylistExclude")
+}
+
+enum CreationInterval {
+  DAY
+  WEEK
+  MONTH
+}
+
+enum Provider {
+  SPOTIFY
+}
+
+model OwnPlaylistItem {
+  id         String   @id @default(uuid())
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id])
+
+  ownPlaylistId String
+  ownPlaylist   OwnPlaylist @relation(fields: [ownPlaylistId], references: [id])
+
+  amount Int
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt @db.Timestamp(6)
 }

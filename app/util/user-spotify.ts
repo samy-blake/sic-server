@@ -1,6 +1,6 @@
 import { AccessToken, SpotifyApi } from "@spotify/web-api-ts-sdk";
 import { prisma } from "../config/db.ts";
-import { JWToken } from "./../interfaces/JWT.interface.ts";
+import { JWToken } from "../interfaces/jwt.ts";
 
 export async function getUserSpotifySdk(tokenData: JWToken) {
   const { spotifyAccessData } = await prisma.auth.findFirst({

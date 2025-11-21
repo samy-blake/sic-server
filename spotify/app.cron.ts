@@ -1,13 +1,22 @@
 import { prisma } from "../app/config/db.ts";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { iDB } from "../app/interfaces/DB.ts";
 
 const api = SpotifyApi.withClientCredentials(
   Deno.env.get("SPOTIFY_CLIENT_ID") as string,
   Deno.env.get("SPOTIFY_CLIENT_SECRET") as string,
 );
 
-async function compareDbAndSpotify(playlist: iDB.Playlist): Promise<void> {
+interface Playlist {
+  id: string;
+  name: string;
+  image: string;
+  createdAt: Date;
+  updatedAt: Date;
+  genre: string;
+  createUpdateLog: boolean;
+  order: number;
+}
+async function compareDbAndSpotify(playlist: Playlist): Promise<void> {
   const dbSongs = await prisma.song.findMany({
     include: {
       playlists: {
@@ -24,7 +33,6 @@ async function compareDbAndSpotify(playlist: iDB.Playlist): Promise<void> {
       },
     },
   });
-  // api.playlists.getPlaylistItems(playlist.id, "DE", "all", )
   const spotifyPlaylist = await api.playlists.getPlaylist(
     playlist.id,
     "DE",
@@ -198,7 +206,7 @@ async function compareDbAndSpotify(playlist: iDB.Playlist): Promise<void> {
 }
 
 async function main() {
-  const playlists: iDB.Playlist[] = await prisma.playlist.findMany();
+  const playlists = await prisma.playlist.findMany();
   playlists.forEach(async (p) => await compareDbAndSpotify(p));
 }
 

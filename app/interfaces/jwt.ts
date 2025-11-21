@@ -1,5 +1,5 @@
 export interface JWToken {
-  id: number;
+  id: string;
   username: string;
   exp: number;
   linkedSpotify: boolean;
