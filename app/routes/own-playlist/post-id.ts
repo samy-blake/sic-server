@@ -9,6 +9,7 @@ import { JWToken } from "../../interfaces/jwt.ts";
 import { jwt } from "hono/jwt";
 
 const schema = z.object({
+  name: z.string().optional(),
   creationInterval: z.enum(["DAY", "WEEK", "MONTH"]).optional(),
   creationIntervalValue: z.number().gt(0).int().optional(),
   linkedPlaylistId: z.string().optional(),

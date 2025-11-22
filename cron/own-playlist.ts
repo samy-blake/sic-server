@@ -29,8 +29,80 @@ function setSpotifyApiClient(spotifyAccessData: string): SpotifyApi {
   );
 }
 
+function calculateDays(start: Date, end: Date): number {
+  const timeDifference: number = end.getTime() - start.getTime();
+  const daysDifference: number = timeDifference / (1000 * 3600 * 24);
+  return daysDifference;
+}
+
+function getWeekDifference(startDate: Date, endDate: Date): number {
+  function getWeekNumber(d: Date): number {
+    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+    const weekNo = Math.ceil(
+      (((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7,
+    );
+    return weekNo;
+  }
+  const startWeek = getWeekNumber(startDate);
+  const endWeek = getWeekNumber(endDate);
+  const yearDiff = endDate.getUTCFullYear() - startDate.getUTCFullYear();
+
+  return endWeek - startWeek + (yearDiff * 52);
+}
+
+function getMonthDifference(startDate: Date, endDate: Date): number {
+  const startYear = startDate.getFullYear();
+  const startMonth = startDate.getMonth();
+  const endYear = endDate.getFullYear();
+  const endMonth = endDate.getMonth();
+
+  const yearDiff = endYear - startYear;
+  const monthDiff = endMonth - startMonth;
+
+  return yearDiff * 12 + monthDiff;
+}
+
 async function workItem(ownPlaylist: OwnPlaylist) {
   if (!ownPlaylist.owner.spotifyAccessData) return;
+  const now = new Date();
+
+  if (ownPlaylist.creationIntervalLastUpddate) {
+    switch (ownPlaylist.creationInterval) {
+      case "DAY": {
+        const dayDiffs = calculateDays(
+          ownPlaylist.creationIntervalLastUpddate,
+          now,
+        );
+        if (dayDiffs < ownPlaylist.creationIntervalValue - 0.2) {
+          return;
+        }
+        break;
+      }
+      case "WEEK": {
+        if (now.getDay() !== 1) return;
+        const weekDiffs = getWeekDifference(
+          ownPlaylist.creationIntervalLastUpddate,
+          now,
+        );
+        if (weekDiffs < ownPlaylist.creationIntervalValue) {
+          return;
+        }
+        break;
+      }
+      case "MONTH": {
+        if (now.getDate() !== 1) return;
+        const monthDiff = getMonthDifference(
+          ownPlaylist.creationIntervalLastUpddate,
+          now,
+        );
+        if (monthDiff < ownPlaylist.creationIntervalValue) {
+          return;
+        }
+      }
+    }
+  }
 
   const spotifyApiClient = setSpotifyApiClient(
     ownPlaylist.owner.spotifyAccessData,
@@ -114,6 +186,15 @@ async function workItem(ownPlaylist: OwnPlaylist) {
   }
 
   spotifyApiClient.logOut();
+
+  await prisma.ownPlaylist.update({
+    where: { id: ownPlaylist.id },
+    data: {
+      state: "SUCCESS",
+      log: "",
+      creationIntervalLastUpddate: new Date(),
+    },
+  });
 }
 
 async function main() {
@@ -150,15 +231,6 @@ async function main() {
   ownPlaylists.forEach(async (p) => {
     try {
       await workItem(p);
-
-      await prisma.ownPlaylist.update({
-        where: { id: p.id },
-        data: {
-          state: "SUCCESS",
-          log: "",
-          creationIntervalLastUpddate: new Date(),
-        },
-      });
     } catch (e) {
       console.log(e);
       await prisma.ownPlaylist.update({
@@ -172,6 +244,6 @@ async function main() {
   });
 }
 
-Deno.cron("Spotify Cron", "0 1 * * *", async () => {
+Deno.cron("Own Playlist Cron", "0 2 * * *", async () => {
   await main();
 });

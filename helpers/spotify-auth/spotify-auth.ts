@@ -2,7 +2,11 @@ import http, { IncomingMessage, ServerResponse } from "node:http";
 import fs from "node:fs";
 import { URL } from "node:url";
 
-const spotifyScopes = ["playlist-modify-private", "playlist-modify-public"];
+const spotifyScopes = [
+  "playlist-modify-private",
+  "playlist-modify-public",
+  "user-read-email",
+];
 
 const hostname = "127.0.0.1";
 const port = 3000;
