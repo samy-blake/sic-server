@@ -4,7 +4,7 @@ import { validator as zValidator } from "hono-openapi/zod";
 import { z } from "zod";
 import "zod-openapi/extend";
 
-import { prisma } from "../../config/db.ts";
+import { prisma } from "config/db.ts";
 import { Context } from "hono";
 import { generateHash } from "../../util/hash.ts";
 import { Env } from "hono";

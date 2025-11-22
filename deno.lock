@@ -17,6 +17,7 @@
     "npm:hono-openapi@~0.4.8": "0.4.8_@hono+zod-validator@0.4.3__hono@4.10.6__zod@3.25.76_hono@4.10.6_openapi-types@12.1.3_zod@3.25.76_zod-openapi@4.2.4__zod@3.25.76",
     "npm:hono@^4.10.6": "4.10.6",
     "npm:jsonwebtoken@^9.0.2": "9.0.2",
+    "npm:prisma-extension-random@~0.2.2": "0.2.2_@prisma+client@6.19.0__prisma@6.19.0_prisma@6.19.0",
     "npm:prisma@*": "6.19.0",
     "npm:prisma@^6.19.0": "6.19.0",
     "npm:spotify-web-api-node@^5.0.2": "5.0.2",
@@ -844,6 +845,12 @@
         "pathe"
       ]
     },
+    "prisma-extension-random@0.2.2_@prisma+client@6.19.0__prisma@6.19.0_prisma@6.19.0": {
+      "integrity": "sha512-tjY5w2pSIgwQh0tDT98KTTYJ0uadUwfbTH+6QbPCfLg+gesgeLZNO4oKv8O6/udx54QvEbyXgNC1LUcjtoypcg==",
+      "dependencies": [
+        "@prisma/client"
+      ]
+    },
     "prisma@6.19.0": {
       "integrity": "sha512-F3eX7K+tWpkbhl3l4+VkFtrwJlLXbAM+f9jolgoUZbFcm1DgHZ4cq9AgVEgUym2au5Ad/TDLN8lg83D+M10ycw==",
       "dependencies": [
@@ -1081,6 +1088,7 @@
       "npm:hono-openapi@~0.4.8",
       "npm:hono@^4.10.6",
       "npm:jsonwebtoken@^9.0.2",
+      "npm:prisma-extension-random@~0.2.2",
       "npm:prisma@^6.19.0",
       "npm:spotify-web-api-node@^5.0.2",
       "npm:zod-openapi@^4.2.4",

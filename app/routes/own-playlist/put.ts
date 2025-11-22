@@ -1,7 +1,7 @@
 import { jwt } from "hono/jwt";
 import { validator as zValidator } from "hono-openapi/zod";
 import { z } from "zod";
-import { prisma } from "../../config/db.ts";
+import { prisma } from "config/db.ts";
 // @ts-types="generated/index.d.ts"
 import { Prisma } from "generated/index.js";
 import { Context, Env } from "hono";

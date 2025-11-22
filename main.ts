@@ -1,6 +1,6 @@
 import app from "./app/routes/app.ts";
 
-import "./spotify/app.cron.ts";
+import "./cron/_index.ts";
 
 Deno.serve(
   {

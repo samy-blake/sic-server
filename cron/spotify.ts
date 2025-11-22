@@ -2,8 +2,8 @@ import { prisma } from "../app/config/db.ts";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
 const api = SpotifyApi.withClientCredentials(
-  Deno.env.get("SPOTIFY_CLIENT_ID") as string,
-  Deno.env.get("SPOTIFY_CLIENT_SECRET") as string,
+  Deno.env.get("SPOTIFY_CLIENT_ID")!,
+  Deno.env.get("SPOTIFY_CLIENT_SECRET")!,
 );
 
 interface Playlist {

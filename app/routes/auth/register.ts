@@ -1,6 +1,6 @@
 import { validator as zValidator } from "hono-openapi/zod";
 import { z } from "zod";
-import { prisma } from "../../config/db.ts";
+import { prisma } from "config/db.ts";
 import { Context, Env } from "hono";
 import { JsonInputSchema } from "../../interfaces/routes.ts";
 import { generateHash } from "../../util/hash.ts";

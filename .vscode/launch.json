@@ -4,7 +4,6 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-
     {
       "request": "launch",
       "name": "Launch Program",
@@ -27,7 +26,43 @@
       "request": "launch",
       "name": "Launch Spotify",
       "type": "node",
-      "program": "${workspaceFolder}/spotify/app.cron.ts",
+      "program": "${workspaceFolder}/cron/spotify.ts",
+      "cwd": "${workspaceFolder}",
+      "env": {},
+      "envFile": "${workspaceFolder}/.env",
+      "runtimeExecutable": "/Users/samyblake/.deno/bin/deno",
+      "runtimeArgs": [
+        "run",
+        "--unstable",
+        "--inspect-wait",
+        "--allow-all",
+        "--unstable-cron",
+      ],
+      "attachSimplePort": 9229
+    },
+    {
+      "request": "launch",
+      "name": "Launch OwnPlaylist",
+      "type": "node",
+      "program": "${workspaceFolder}/cron/own-playlist.ts",
+      "cwd": "${workspaceFolder}",
+      "env": {},
+      "envFile": "${workspaceFolder}/.env",
+      "runtimeExecutable": "/Users/samyblake/.deno/bin/deno",
+      "runtimeArgs": [
+        "run",
+        "--unstable",
+        "--inspect-wait",
+        "--allow-all",
+        "--unstable-cron",
+      ],
+      "attachSimplePort": 9229
+    },
+    {
+      "request": "launch",
+      "name": "Launch Spotify Auth",
+      "type": "node",
+      "program": "${workspaceFolder}/spotify-auth.ts",
       "cwd": "${workspaceFolder}",
       "env": {},
       "envFile": "${workspaceFolder}/.env",

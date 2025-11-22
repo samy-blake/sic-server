@@ -33,7 +33,7 @@ app.get(
         version: "0.1.0",
         description: "Author: Sören Balke",
       },
-      servers: [{ url: "http://localhost:3000", description: "Local Server" }],
+      // servers: [{ url: "http://localhost:3000", description: "SiC Server" }],
     },
   }),
 );

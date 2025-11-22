@@ -1,17 +1,17 @@
 import dotenvx from "@dotenvx/dotenvx";
 dotenvx.config();
 
-import { prisma } from "../app/config/db.ts";
-import { generateHash } from "../app/util/hash.ts";
+import { prisma } from "config/db.ts";
+import { generateHash } from "util/hash.ts";
 // @ts-types="generated/index.d.ts"
 import { Prisma } from "generated/index.js";
 
-if (!await prisma.auth.count()) {
+if (!await prisma.user.count()) {
   const auth = {
-    username: "sbalke",
+    username: "samyblake",
     password: generateHash("soerenbalke"),
   };
-  await prisma.auth.create({ data: auth });
+  await prisma.user.create({ data: auth });
 }
 
 const playlists: Prisma.PlaylistCreateManyInput[] = [
@@ -77,14 +77,6 @@ const playlists: Prisma.PlaylistCreateManyInput[] = [
     name: "Sharing is Caring - DnB Edition",
     image: "",
     order: 10,
-  },
-  {
-    id: "3f1Kqad1rYCIRuMukyeOVe",
-    genre: "Hardstyle, Hardcore",
-    name: "Sharing is Caring - Schubrakete Daily",
-    createUpdateLog: false,
-    image: "",
-    order: 11,
   },
 ];
 

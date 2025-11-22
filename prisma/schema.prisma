@@ -24,8 +24,10 @@ model User {
 
   ownPlaylist OwnPlaylist[]
 
-  songTags     SongTags[]
-  userFavSongs UserFavSongs[]
+  likedSongs    Song[] @relation("UserLikedSongs")
+  dislikedSongs Song[] @relation("UserDislikedSongs")
+
+  songTags SongTags[]
 }
 
 enum UserRoles {
@@ -73,10 +75,12 @@ model Song {
 
   updateLog UpdateLog[]
 
-  createdAt    DateTime       @default(now()) @db.Timestamp(6)
-  updatedAt    DateTime       @updatedAt @db.Timestamp(6)
-  tags         SongTags[]
-  userFavSongs UserFavSongs[]
+  createdAt DateTime   @default(now()) @db.Timestamp(6)
+  updatedAt DateTime   @updatedAt @db.Timestamp(6)
+  tags      SongTags[]
+
+  likedByUser    User[] @relation("UserLikedSongs")
+  dislikedByUser User[] @relation("UserDislikedSongs")
 
   ownPlaylistIncludes OwnPlaylist[] @relation("OwnPlaylistInclude")
   ownPlaylistExcludes OwnPlaylist[] @relation("OwnPlaylistExclude")
@@ -107,18 +111,6 @@ model SongTags {
   @@id([songId, tagId])
 }
 
-model UserFavSongs {
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  songId String
-  song   Song   @relation(fields: [songId], references: [id])
-
-  createdAt DateTime @default(now()) @db.Timestamp(6)
-
-  @@id([songId, userId])
-}
-
 model UpdateLog {
   id     Int     @id @default(autoincrement())
   songId String?
@@ -139,6 +131,11 @@ enum UpdateLogTyp {
   DELETE
 }
 
+enum OwnPlaylistState {
+  SUCCESS
+  FAILED
+}
+
 model OwnPlaylist {
   id String @id @default(uuid())
 
@@ -151,8 +148,9 @@ model OwnPlaylist {
 
   items OwnPlaylistItem[]
 
-  creationIntervalValue Int
-  creationInterval      CreationInterval
+  creationIntervalLastUpddate DateTime?
+  creationIntervalValue       Int
+  creationInterval            CreationInterval
 
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id])
@@ -162,6 +160,10 @@ model OwnPlaylist {
 
   ownPlaylistIncludes Song[] @relation("OwnPlaylistInclude")
   ownPlaylistExcludes Song[] @relation("OwnPlaylistExclude")
+
+  state OwnPlaylistState?
+
+  log String? @db.LongText
 }
 
 enum CreationInterval {
