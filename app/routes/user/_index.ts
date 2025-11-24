@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 
-import put from "./put.ts";
+import post from "./post.ts";
 
 const app = new Hono();
 
-app.put("/", ...put);
+app.post("/", ...post);
 
 export { app as UserRoutes };

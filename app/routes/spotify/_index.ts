@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 
-import access from "./access.ts";
-import userToken from "./user-token.ts";
+import get from "./get.ts";
+import post from "./post.ts";
 
 const app = new Hono();
 
-app.post("/user-token", ...userToken);
-app.get("/access", ...access);
+app.post("/", ...post);
+app.get("/", ...get);
 
 export { app as SpotifyRoutes };

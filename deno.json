@@ -11,6 +11,7 @@
     "prisma:seed": "deno --allow-all ./prisma/seed.ts"
   },
   "imports": {
+    "interfaces/": "./app/interfaces/",
     "config/": "./app/config/",
     "util/": "./app/util/",
     "@spotify/web-api-ts-sdk": "npm:@spotify/web-api-ts-sdk@^1.2.0",

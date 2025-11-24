@@ -1,4 +1,4 @@
-import { JWToken } from "../../interfaces/jwt.ts";
+import { JWToken } from "interfaces/jwt.ts";
 import { jwt } from "hono/jwt";
 import { validator as zValidator } from "hono-openapi/zod";
 import { z } from "zod";
@@ -6,9 +6,10 @@ import "zod-openapi/extend";
 
 import { prisma } from "config/db.ts";
 import { Context } from "hono";
-import { generateHash } from "../../util/hash.ts";
+import { generateHash } from "util/hash.ts";
 import { Env } from "hono";
-import { JsonInputSchema } from "../../interfaces/routes.ts";
+import { JsonInputSchema } from "interfaces/routes.ts";
+import { openApiAuthDescription } from "util/openapi.ts";
 
 const schema = z.object({
   username: z.string(),
@@ -22,6 +23,15 @@ const schema = z.object({
 }));
 
 export default [
+  openApiAuthDescription({
+    description: "update login data",
+    tags: ["User"],
+    responses: {
+      204: {
+        description: "update successful",
+      },
+    },
+  }),
   jwt({
     secret: Deno.env.get("JWT_SECRET") || "",
   }),
@@ -68,7 +78,7 @@ export default [
         },
       });
 
-      return c.body(null, 200);
+      return c.body(null, 204);
     };
   }(),
 ];

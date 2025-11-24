@@ -1,12 +1,13 @@
-import { validator as zValidator } from "hono-openapi/zod";
+import { openApiAuthDescription } from "util/openapi.ts";
+import { resolver, validator as zValidator } from "hono-openapi/zod";
 import { z } from "zod";
 import { prisma } from "config/db.ts";
 import { Context } from "hono";
 import { Env } from "hono";
-import { compareHash } from "../../util/hash.ts";
-import { JWToken } from "../../interfaces/jwt.ts";
+import { compareHash } from "util/hash.ts";
+import { JWToken } from "interfaces/jwt.ts";
 import { sign } from "hono/jwt";
-import { JsonInputSchema } from "../../interfaces/routes.ts";
+import { JsonInputSchema } from "interfaces/routes.ts";
 
 const schema = z.object({
   username: z.string(),
@@ -14,6 +15,20 @@ const schema = z.object({
 });
 
 export default [
+  openApiAuthDescription({
+    description: "User Login",
+    tags: ["Auth"],
+    responses: {
+      200: {
+        description: "Successful Login",
+        content: {
+          "application/json": {
+            schema: resolver(z.object({ token: z.string() })),
+          },
+        },
+      },
+    },
+  }),
   zValidator("json", schema),
   function <
     E extends Env,

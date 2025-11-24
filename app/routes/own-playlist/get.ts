@@ -1,3 +1,4 @@
+import { openApiAuthDescription } from "util/openapi.ts";
 import { jwt } from "hono/jwt";
 import { validator as zValidator } from "hono-openapi/zod";
 import { z } from "zod";
@@ -5,14 +6,28 @@ import { prisma } from "config/db.ts";
 // @ts-types="generated/index.d.ts"
 import { Prisma } from "generated/index.js";
 import { Context, Env } from "hono";
-import { JsonInputSchema } from "../../interfaces/routes.ts";
-import { JWToken } from "../../interfaces/jwt.ts";
+import { JsonInputSchema } from "interfaces/routes.ts";
+import { JWToken } from "interfaces/jwt.ts";
 
 const schema = z.object({
-  // name: z.string().optional(),
+  name: z.string().optional(),
 });
 
 export default [
+  openApiAuthDescription({
+    description: "Own Playlists",
+    tags: ["Own Playlist"],
+    responses: {
+      200: {
+        description: "get single own playlist with items",
+        content: {
+          "application/json": {
+            // schema: resolver(z.object({ token: z.string() })),
+          },
+        },
+      },
+    },
+  }),
   jwt({
     secret: Deno.env.get("JWT_SECRET") || "",
   }),

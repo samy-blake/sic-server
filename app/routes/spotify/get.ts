@@ -1,12 +1,13 @@
+import { openApiAuthDescription } from "util/openapi.ts";
 import { validator as zValidator } from "hono-openapi/zod";
 import { z } from "zod";
 import { prisma } from "config/db.ts";
 // @ts-types="generated/index.d.ts"
 import { Prisma } from "generated/index.js";
 import { Context, Env } from "hono";
-import { JsonInputSchema } from "../../interfaces/routes.ts";
+import { JsonInputSchema } from "interfaces/routes.ts";
 import { jwt } from "hono/jwt";
-import { JWToken } from "../../interfaces/jwt.ts";
+import { JWToken } from "interfaces/jwt.ts";
 import { AccessToken } from "@spotify/web-api-ts-sdk";
 
 const schema = z.object({
@@ -14,6 +15,23 @@ const schema = z.object({
 });
 
 export default [
+  openApiAuthDescription({
+    description: "Spotify",
+    tags: ["Spotify"],
+    responses: {
+      200: {
+        description: "get user spotify access data",
+        content: {
+          "application/json": {
+            // schema: resolver(z.object({ token: z.string() })),
+          },
+        },
+      },
+      403: {
+        description: "no access data available",
+      },
+    },
+  }),
   zValidator("query", schema),
   jwt({
     secret: Deno.env.get("JWT_SECRET") || "",

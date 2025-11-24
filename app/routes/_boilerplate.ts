@@ -4,7 +4,7 @@ import { prisma } from "config/db.ts";
 // @ts-types="generated/index.d.ts"
 import { Prisma } from "generated/index.js";
 import { Context, Env } from "hono";
-import { JsonInputSchema } from "../../interfaces/routes.ts";
+import { JsonInputSchema } from "interfaces/routes.ts";
 
 const schema = z.object({
   // name: z.string().optional(),

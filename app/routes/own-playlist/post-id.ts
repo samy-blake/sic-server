@@ -1,11 +1,12 @@
+import { openApiAuthDescription } from "util/openapi.ts";
 import { validator as zValidator } from "hono-openapi/zod";
 import { z } from "zod";
 import { prisma } from "config/db.ts";
 // @ts-types="generated/index.d.ts"
 import { Prisma } from "generated/index.js";
 import { Context, Env } from "hono";
-import { JsonInputSchema } from "../../interfaces/routes.ts";
-import { JWToken } from "../../interfaces/jwt.ts";
+import { JsonInputSchema } from "interfaces/routes.ts";
+import { JWToken } from "interfaces/jwt.ts";
 import { jwt } from "hono/jwt";
 
 const schema = z.object({
@@ -20,6 +21,23 @@ const schema = z.object({
 });
 
 export default [
+  openApiAuthDescription({
+    description: "Own Playlists",
+    tags: ["Own Playlist"],
+    responses: {
+      200: {
+        description: "update single own playlist",
+        content: {
+          "application/json": {
+            // schema: resolver(z.object({ token: z.string() })),
+          },
+        },
+      },
+      404: {
+        description: "not found",
+      },
+    },
+  }),
   jwt({
     secret: Deno.env.get("JWT_SECRET") || "",
   }),
@@ -30,6 +48,14 @@ export default [
     I extends JsonInputSchema<typeof schema>,
   >() {
     return async (c: Context<E, P, I>) => {
+      if (
+        !await prisma.ownPlaylist.findFirst({
+          where: { id: c.req.param("id") },
+        })
+      ) {
+        return c.body(null, 404);
+      }
+
       const tokenData: JWToken = c.get("jwtPayload");
       const body = c.req.valid("json");
 
@@ -58,7 +84,7 @@ export default [
       if (Object.keys(data).length > 0) {
         playlist = await prisma.ownPlaylist.update({
           where: {
-            id: c.req.param("id") as string,
+            id: c.req.param("id"),
             owner: {
               id: tokenData.id,
             },
